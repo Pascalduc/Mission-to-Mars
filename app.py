@@ -13,6 +13,7 @@ mongo = PyMongo(app)
 @app.route("/")
 def index():
    mars = mongo.db.mars.find_one()
+   # remder automatically search for index.html inside template folder case sensitive
    return render_template("index.html", mars=mars)
 
 
