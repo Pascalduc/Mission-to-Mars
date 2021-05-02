@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup as soup
 import pandas as pd
 import datetime as dt
 from webdriver_manager.chrome import ChromeDriverManager
+import time
 
 
 def scrape_all():
@@ -19,7 +20,8 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
-        "last_modified": dt.datetime.now()
+        "hemispheres": hemisphere_image_urls(browser),
+        "last_modified": dt.datetime.now()        
     }
 
     # Stop webdriver and return data
@@ -96,6 +98,39 @@ def mars_facts():
 
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html(classes="table table-striped")
+
+def hemisphere_image_urls(browser):
+    # Use browser to visit the URL 
+    url = 'https://marshemispheres.com/'
+    browser.visit(url)
+    time.sleep(1)
+
+    # Create a list to hold the images and titles.
+    hemisphere_image_urls = []
+
+        # Add try/except for error handling
+    try:
+        # retrieve the image urls and titles for each hemisphere.
+        for hemi in range(0, 4):
+            time.sleep(0.5)
+            page = browser.find_by_tag('h3')
+            page[hemi].click()
+            
+            img_html = browser.html
+            hemi_soup = soup(img_html, 'html.parser')
+            
+            url = 'https://marshemispheres.com/'
+            img_url = url + hemi_soup.find_all('a', target ='_blank')[2].get('href')
+            title = browser.find_by_tag('h2').text
+            hemisphere_image_urls.append({'title': title, 'img_url': img_url})
+            
+            browser.back()
+
+    except AttributeError:
+        return None
+
+    return hemisphere_image_urls
+
 
 if __name__ == "__main__":
 
